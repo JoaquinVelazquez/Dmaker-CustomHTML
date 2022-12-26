@@ -1,0 +1,312 @@
+<div class="header-wrapper header-wrapper--fixed {{headerAdditionalClasses}}" data-ms-theme="tools">
+    {{#if flash.enabled}} {{> components/flash}} {{/if}}
+    {{> components/cookieDisclaimer}}
+    <header role="banner" class="header" itemtype="http://schema.org/Store" itemid="#this" itemscope=""
+        class="nav-tools">
+        <div class="nav-tools-header__top header--custom-background">
+            <div class="nav-tools-header__top-bound">
+                <a href="/" id="logo-wrapper" class="nav-tools__logo-wrapper">
+                    {{#if logo}}
+                    <img id="image-logo" src="{{logo}}" alt="{{name}}" />
+                    {{else}}
+                    <span class="header--custom-text">
+                        {{name}}
+                    </span>
+                    {{/if}}
+                </a>
+                <!-- Search box -->
+                <div class="nav-tools-header__top-bound-separation">
+                    <div class="top-separation">
+                        <label class="nav-tools-header__searchbox-mock" for="search-box-toggle"> </label>
+                        <input type="checkbox" name="search-box-toggle" id="search-box-toggle" />
+                        <div class="nav-tools-header__searchbox {{hasInfoClass}}">
+                            {{#if headerMessage}}
+                            <div class="header__searchbox-info header--custom-text">
+                                {{{headerMessage}}}
+                            </div>
+                            <!-- /.header__searchbox-info header--custom-text -->
+                            {{/if}}
+                            <form class="search-box-container" id="search-form" action="{{home_url}}">
+                                <div class="close"></div>
+                                <input type="text" id="search-input" name="search-box-tools"
+                                    placeholder="{{i18n.placeholder}}" />
+                                <button type="submit" class="search-button">
+                                    {{> tools/views/partials/search}}
+                                </button>
+                                <!-- /.search-button -->
+                            </form>
+                        </div>
+                        <!-- Icons contact/cart -->
+                        <nav class="nav-tools-header__icons">
+                            {{#if contact.href}}
+                            <a href="{{contact.href}}" class="contact-button" rel="nofollow">
+                                {{> tools/views/partials/contact}}
+                            </a>
+                            {{/if}}
+                            {{#if cart.href}}
+                            <a href="{{cart.href}}" title="Carrito" class="cart-button" id="nav-cart">
+                                {{> tools/views/partials/cart-badge}}
+                                {{> tools/views/partials/cart}}
+                            </a>
+                            {{/if}}
+                            <!-- Required for menu-responsive widget -->
+                            <input type="checkbox" id="mobile-categories-menu-switch"
+                                name="nav-tools-header__menu-switch" />
+                            <label for="mobile-categories-menu-switch" id="hamburguer-menu">
+                                <span class="nav-header__hamburger"></span>
+                                <span class="nav-header__hamburger"></span>
+                                <span class="nav-header__hamburger"></span>
+                            </label>
+                            <!-- Mobile categories menu has to be a sibling of switcher-->
+                            <ul class="nav-list nav-list--vertical header--custom-background"
+                                itemtype="http://schema.org/SiteNavigationElement" itemscope>
+                                <div class="nav-tools-list--vertical__item" data-toggle="{{this.name}}">
+                                    <li class="nav-tools-list--vertical__category">
+                                        <a href="/listado/electronica-audio-video/">Electrónica</a>
+                                        <img class="electronica-flecha"
+                                            src="https://cdn-icons-png.flaticon.com/512/25/25638.png" alt="">
+                                        <!-- /.attr-x -->
+                                        <div class="submenu-mobile electronica-mobile invisible">
+                                            <a href="/listado/electronica-audio-video/televisores/">Televisores</a>
+                                            <a href="/listado/electronica-audio-video/audio/">Audio</a>
+                                        </div>
+                                        <hr class="nav-tools-list--vertical__hr header--custom-border" />
+                                    </li>
+                                    <li class="nav-tools-list--vertical__category">
+                                        <a href="/listado/electrodomesticos-aires-ac/">Electrodomésticos y Aires Acondicionados</a>
+                                        <img class="electrodomesticos-flecha"
+                                            src="https://cdn-icons-png.flaticon.com/512/25/25638.png" alt="">
+                                        <!-- /.attr-x -->
+                                        <div class="submenu-mobile electrodomesticos-mobile invisible">
+                                            <a href="/listado/electrodomesticos-aires-ac/lavado/">Lavado</a>
+                                            <a href="/listado/electrodomesticos-aires-ac/refrigeracion/">Refrigeración</a>
+                                            <a href="/listado/electrodomesticos-aires-ac/climatizacion/">Climatización</a>
+                                            <a href="/listado/electrodomesticos-aires-ac/coccion/">Cocinas y Hornos</a>
+                                            <a href="/listado/electrodomesticos-aires-ac/pequenos-electrodomesticos/">Pequeños Electrodomésticos</a>
+                                        </div>
+                                        <hr class="nav-tools-list--vertical__hr header--custom-border" />
+                                    </li>
+                                    <li class="nav-tools-list--vertical__category">
+                                        <a href="/listado/celulares-telefonos/celulares-smartphones/">Celulares</a>
+                                        <!-- /.attr-x -->
+                                        <hr class="nav-tools-list--vertical__hr header--custom-border" />
+                                    </li>
+                                    <li class="nav-tools-list--vertical__category">
+                                        <a href="/listado/computacion/">Computación</a>
+                                        <img class="computacion-flecha"
+                                            src="https://cdn-icons-png.flaticon.com/512/25/25638.png" alt="">
+                                        <!-- /.attr-x -->
+                                        <div class="submenu-mobile computacion-mobile invisible">
+                                            <a href="/listado/computacion/pc-escritorio/">Pc de Escritorio</a>
+                                            <a href="/listado/computacion/tablets-accesorios/">Tablets</a>
+                                            <a href="/listado/computacion/laptops-accesorios/">Notebooks</a>
+                                            <a href="/listado/computacion/monitores-accesorios/">Monitores</a>
+                                            <a href="/componentes">Componentes</a>
+                                            <div class="subcategoria-mobile">
+                                                <a href="/listado/computacion/componentes-pc/memoriasram">Memoria Ram</a>
+                                                <a href="/listado/computacion/componentes-pc/placas">Placas madre</a>
+                                                <a href="/listado/computacion/componentes-pc/discos-accesorios/">Discos Solidos</a>
+                                            </div>
+                                            <a href="/listado/computacion/perifericos-pc/">Periféricos</a>
+                                            <div class="subcategoria-mobile">
+                                                <a href="/listado/computacion/perifericos-pc/mouses-teclados/mouses/">Mouse</a>
+                                                <a href="/listado/computacion/perifericos-pc/teclado">Teclados</a>
+                                                <a href="/computacion/perifericos-pc/webcams">Webcam</a>
+                                            </div>
+                                            <a href="/listado/computacion/impresion/">Impresión</a>
+                                            <div class="subcategoria-mobile">
+                                                {{!-- <a href="/listado/computacion/impresion/impresoras/">Impresoras</a>
+                                                <a href="/listado/computacion/impresion/insumos-impresion/recargas-tinta/">Cartuchos</a> --}}
+                                            </div>
+                                        </div>
+                                        <hr class="nav-tools-list--vertical__hr header--custom-border" />
+                                    </li>
+                                    <li class="nav-tools-list--vertical__category">
+                                        <a href=" /listado/herramientas/">Herramientas</a>
+                                        <img class="herramientas-flecha"
+                                            src="https://cdn-icons-png.flaticon.com/512/25/25638.png" alt="">
+                                        <!-- /.attr-x -->
+                                        <div class="submenu-mobile herramientas-mobile invisible">
+                                            <a href="/listado/herramientas/herramientas-electricas/">Eléctricas</a>
+                                            <a href="/listado/herramientas/herramientas-jardin/">Jardín</a>
+                                        </div>
+                                        <hr class="nav-tools-list--vertical__hr header--custom-border" />
+                                    </li>
+                                    <li class="nav-tools-list--vertical__category">
+                                        <a>Más Categorías</a>
+                                        <img class="otros-flecha"
+                                            src="https://cdn-icons-png.flaticon.com/512/25/25638.png" alt="">
+                                        <!-- /.attr-x -->
+                                        <div class="submenu-mobile otros-mobile invisible">
+                                            <a href="/listado/deportes-fitness/">Deportes y Fitness</a>
+                                            <a href="/listado/hogar-muebles-jardin/muebles-hogar/#applied_filter_id%3Dcategory%26applied_filter_name%3DCategor%C3%ADas%26applied_filter_order%3D2%26applied_value_id%3DMLA436380%26applied_value_name%3DMuebles+para+el+Hogar%26applied_value_order%3D2%26applied_value_results%3D10%26is_custom%3Dfalse">Hogar</a>
+                                        </div>
+                                        <hr class="nav-tools-list--vertical__hr header--custom-border" >
+                                    </li>
+
+                                    <!-- /.nav-tools-list--vertical__category header--custom-text -->
+                                    <div class="target-subCategory-{{@index}}">
+                                        {{#each this.nodes}}
+                                        <div class="nav-tools-list--vertical__subitem">
+                                            <li class="header--custom-text">
+                                                <a href="{{this.url}}">{{this.name}}</a>
+                                                {{#if this.nodes}}
+                                                <label for="attr-{{@../index}}-{{@index}}"
+                                                    data-js="attribute-{{@../index}}" class="toggle-menu attribute">
+                                                    <span class="nav-header__toggle"></span>
+                                                    <span class="nav-header__toggle"></span>
+                                                </label>
+                                                {{/if}}
+                                                <!-- /.attr-x -->
+                                            </li>
+                                            <!-- /.header--custom-text -->
+                                            <div
+                                                class="nav-tools-list--vertical__attr-container target-attribute-{{@../index}}">
+                                                {{#each this.nodes}}
+                                                <li class="nav-tools-list--vertical__attribute header--custom-text">
+                                                    <a href="{{this.url}}">{{this.name}}</a>
+                                                </li>
+                                                {{/each}}
+                                            </div>
+                                        </div>
+                                        {{/each}}
+                                    </div>
+                                </div>
+
+                                <li class="nav-tools-list--vertical__category header--custom-text how-buy__button"
+                                    data-js="how-buy__button" itemprop="name"
+                                    tools-custom-data-emitter="how-buy__button">
+                                    <a href="{{linkToHowBuy.href}}">{{linkToHowBuy.label}}</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                    <!-- Desktop navigation menu -->
+                    <div class="nav-tools-header__categories header--custom-background">
+                        <ul itemscope itemtype="http://schema.org/SiteNavigationElement"
+                            class="nav-list nav-list--horizontal header--custom-background header--custom-text header--custom-border"
+                            id="nav-list">
+                            {{#each menu}}
+                            <li class="nav-list__item" itemprop="name" tools-custom-data-emitter="{{@index}}">
+                                <a href="{{this.url}}" class="nav-list__link">{{this.name}}</a>
+                            </li>
+                            {{/each}}
+
+                            <li class="nav-list__item nav-list__item--more" style="visibility: visible;">
+                                <div class="nav-list__link">{{i18n.moreCategories}}</div>
+                                <ul class="nav-list nav-list--dropdown header--custom-background" id="more-dropdown">
+                                    {{#each menu}}
+                                    <li class="nav-list__item header--custom-text" itemprop="name"
+                                        tools-custom-data-receiver="{{@index}}">
+                                        <a href="{{this.url}}" class="nav-list__link">{{this.name}}</a>
+                                        <span>
+                                            <hr />
+                                        </span>
+
+                                        <ul class="nav-list__item-subcategory">
+                                            {{#each this.nodes}}
+                                            <li class="nav-tools-list--vertical__attribute header--custom-text">
+                                                <a class="text-bold" href="{{this.url}}">{{this.name}}</a>
+                                            </li>
+                                            <ul class="nav-list__item-subcategory">
+                                                {{#each this.nodes}}
+                                                <li class="nav-tools-list--vertical__attribute header--custom-text">
+                                                    <a class="text-normal" href="{{this.url}}">{{this.name}}</a>
+                                                </li>
+                                                {{/each}}
+                                            </ul>
+                                            {{/each}}
+                                        </ul>
+                                        <!-- /.nav-list__item-subcategory -->
+                                    </li>
+                                    {{/each}}
+                                </ul>
+                            </li>
+                        </ul>
+                        <div class="subcategorires header--custom-background">
+                            {{#each menu}} {{#if this.nodes}}
+                            <div class="nav-tools-list--vertical__subitem-container" data-toggle="{{@index}}">
+                                <ul class="grid-list">
+                                    {{#each this.nodes}}
+                                    <li class="nav-tools-list--vertical__subitem header--custom-text">
+                                        <a href="{{this.url}}" class="">{{this.name}}</a>
+                                        <ul class="nav-tools-list--vertical__attribute_container">
+                                            {{#each this.nodes}}
+                                            <li class="nav-tools-list--vertical__attribute header--custom-text">
+                                                <a href="{{this.url}}" class="">{{this.name}}</a>
+                                            </li>
+                                            {{/each}}
+                                        </ul>
+                                    </li>
+                                    {{/each}}
+                                </ul>
+                            </div>
+                            {{/if}} {{/each}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="menu-desktop">
+            <ul class="dropdown">
+                <li><a href="/listado/electronica-audio-video/_DisplayType_G">Electrónica</a>
+                    <ul>
+                        <li><a href="/listado/electronica-audio-video/televisores/_DisplayType_G ">Televisores</a></li>
+                        <li><a href="/listado/electronica-audio-video/audio/_DisplayType_G">Audio</a></li>
+                    </ul>
+                </li>
+                <li><a href="/listado/electrodomesticos-aires-ac/_DisplayType_G">Electrodomésticos y Aires Acondicionados</a>
+                    <ul>
+                        <li><a href="/listado/electrodomesticos-aires-ac/lavado/_DisplayType_G">Lavado</a></li>
+                        <li><a href="/listado/electrodomesticos-aires-ac/refrigeracion/_DisplayType_G">Refrigeración</a></li>
+                        <li><a href="/listado/electrodomesticos-aires-ac/climatizacion/_DisplayType_G">Climatización</a></li>
+                        <li><a href="/listado/electrodomesticos-aires-ac/coccion/_DisplayType_G">Cocinas y Hornos</a></li>
+                        <li><a href="/listado/electrodomesticos-aires-ac/pequenos-electrodomesticos/_DisplayType_G">Pequeños Electrodomesticos</a></li>
+                    </ul>
+                </li>
+                <li><a href="/listado/celulares-telefonos/celulares-smartphones/_DisplayType_G">Celulares</a></li>
+                <li><a href="/listado/computacion/_DisplayType_G">Computación</a>
+                    <ul>
+                        <li><a href="/listado/computacion/pc-escritorio/_DisplayType_G ">Pc de Escritorio</a></li>
+                        <li><a href="/listado/computacion/tablets-accesorios/_DisplayType_G">Tablets</a></li>
+                        <li><a href="/listado/computacion/laptops-accesorios/_DisplayType_G">Notebooks</a></li>
+                        <li><a href="/listado/computacion/monitores-accesorios/_DisplayType_G">Monitores</a></li>
+                        <li><a href="/componentes_DisplayType_G">Componentes <img src="https://cdn-icons-png.flaticon.com/512/25/25638.png" alt=""></a>
+                            <ul>
+                                <li><a href="/listado/computacion/componentes-pc/memoriasram/_DisplayType_G">Memoria Ram</a></li>
+                                <li><a href="/listado/computacion/componentes-pc/placas/_DisplayType_G">Placas Madre</a></li>
+                                <li><a href="/listado/computacion/componentes-pc/discos-accesorios/_DisplayType_G">Discos Solidos</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="/listado/computacion/perifericos-pc/_DisplayType_G ">Periféricos <img src="https://cdn-icons-png.flaticon.com/512/25/25638.png" alt=""></a>
+                            <ul>
+                                <li><a href="/listado/computacion/perifericos-pc/mouses-teclados/mouses/_DisplayType_G">Mouse</a></li>
+                                <li><a href="/listado/computacion/perifericos-pc/teclado/_DisplayType_G">Teclados</a></li>
+                                <li><a href="/computacion/perifericos-pc/webcams/_DisplayType_G">Webcams</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="/listado/computacion/impresion/_DisplayType_G ">Impresión</a>
+                            <ul>
+                                {{!-- <li><a href="/listado/computacion/impresion/impresoras/_DisplayType_G ">Impresoras</a></li>
+                                <li><a href="/listado/computacion/impresion/insumos-impresion/recargas-tinta/_DisplayType_G ">Cartuchos</a></li> --}}
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li><a href="/listado/herramientas/_DisplayType_G">Herramientas</a>
+                    <ul>
+                        <li><a href="/listado/herramientas/herramientas-electricas/_DisplayType_G">Eléctricas</a></li>
+                        <li><a href="/listado/herramientas/herramientas-jardin/_DisplayType_G">Jardín</a></li>
+                    </ul>
+                </li>
+                <li><a>Más Categorías</a>
+                    <ul>
+                        <li><a href="/listado/deportes-fitness/_DisplayType_G">Deportes y Fitness</a></li>
+                        <li><a href="/listado/hogar-muebles-jardin/muebles-hogar/#applied_filter_id%3Dcategory%26applied_filter_name%3DCategor%C3%ADas%26applied_filter_order%3D2%26applied_value_id%3DMLA436380%26applied_value_name%3DMuebles+para+el+Hogar%26applied_value_order%3D2%26applied_value_results%3D10%26is_custom%3Dfalse">Hogar</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </header>
+</div>
