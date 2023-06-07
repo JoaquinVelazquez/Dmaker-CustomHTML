@@ -923,10 +923,6 @@ header .nav-tools-header__categories {
         flex-direction: column
     }
 
-    .nav-footer-about p {
-        order: 1
-    }
-
     .nav-footer-about p,
     .nav-footer-about a,
     .nav-footer-about .nav-tools-header__top-bound #nav-list .nav-list__item--more .nav-list__item .nav-list__item-subcategory a+.nav-list__item-attributes a,
@@ -1920,9 +1916,24 @@ svg g path .header--custom-svg {
     color: white !important;
     background-color: #1711b1 !important;
     border-radius: 3px;
+    margin: 0 !important;
+}
+
+.ui-pdp-price__second-line .ui-pdp-price__second-line__label span{
+    color: white !important;
 }
 
 .andes-money-amount__discount {
+    color: white !important;
+    background-color: #1711b1 !important;
+    border-radius: 3px;
+    padding: 3px !important;
+}
+
+.andes-money-amount__discount2{
+    display: flex;
+    font-weight: 400;
+    align-items: center;
     color: white !important;
     background-color: #1711b1 !important;
     border-radius: 3px;
@@ -4966,3 +4977,11 @@ form {
 .subscription-form-control {
     margin-right: 10px!important;
 } */
+
+/* .ui-item .ui-item__content{margin:20px 0px}
+
+.ui-item__price-block{margin-top: 20px;}
+
+.ui-item .ui-item__discount-text{margin-top:13px}
+
+.ui-item.price-digits-5 .price-tag__disabled{margin-top: 15px} */

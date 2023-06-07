@@ -1,3 +1,20 @@
+
+(function() {
+    let link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+    link.type = 'image/x-icon';
+    link.rel = 'shortcut icon';
+    link.href = 'https://iili.io/HjA8TbV.png';
+    document.getElementsByTagName('head')[0].appendChild(link);
+  })();
+  function faviconIn(){
+    let link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+    link.type = 'image/x-icon';link.rel = 'shortcut icon';
+    link.href = 'https://iili.io/HjA8TbV.png';
+    document.getElementsByTagName('head')[0].appendChild(link)
+  };
+  
+  setTimeout(faviconIn,1000);
+
 let flechaElectronica = document.querySelector(".electronica-flecha");
 let flechaElectrodomesticos = document.querySelector(".electrodomesticos-flecha");
 let flechaComputacion = document.querySelector(".computacion-flecha");
@@ -34,3 +51,4 @@ flechaOtros.addEventListener("click", function(){
     submenuOtros.classList.toggle("invisible");
     flechaOtros.classList.toggle("rotacion");
 });
+

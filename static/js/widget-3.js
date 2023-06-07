@@ -1,660 +1,611 @@
-const URLactual = window.location.pathname;
+/* @preserve
+    _____ __ _     __                _
+   / ___// /(_)___/ /___  ____      (_)___
+  / (_ // // // _  // -_)/ __/_    / /(_-<
+  \___//_//_/ \_,_/ \__//_/  (_)__/ //___/
+                              |___/
 
-/*ELECTRONICA*/
-if (document.querySelector('.ui-search-toolbar')) {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/UDCxzQ.jpg';
-    banner.style = 'margin: 0 auto; max-width: 380px; display: flex;';
+  Version: 1.7.4
+  Author: Nick Piscitelli (pickykneee)
+  Website: https://nickpiscitelli.com
+  Documentation: http://nickpiscitelli.github.io/Glider.js
+  License: MIT License
+  Release Date: October 25th, 2018
 
-    const parent = document.querySelector('.ui-search-toolbar');
+*/
 
-    if (URLactual == '/listado/electronica-audio-video/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
+/* global define */
+
+(function (factory) {
+    typeof define === 'function' && define.amd ?
+        define(factory) :
+        typeof exports === 'object' ?
+        (module.exports = factory()) :
+        factory()
+})(function () {
+    ('use strict') // eslint-disable-line no-unused-expressions
+
+    /* globals window:true */
+    var _window = typeof window !== 'undefined' ? window : this
+
+    var Glider = (_window.Glider = function (element, settings) {
+        var _ = this
+
+        if (element._glider) return element._glider
+
+        _.ele = element
+        _.ele.classList.add('glider')
+
+        // expose glider object to its DOM element
+        _.ele._glider = _
+
+        // merge user setting with defaults
+        _.opt = Object.assign({}, {
+                slidesToScroll: 1,
+                slidesToShow: 1,
+                resizeLock: true,
+                duration: 0.5,
+                // easeInQuad
+                easing: function (x, t, b, c, d) {
+                    return c * (t /= d) * t + b
+                }
+            },
+            settings
+        )
+
+        // set defaults
+        _.animate_id = _.page = _.slide = 0
+        _.arrows = {}
+
+        // preserve original options to
+        // extend breakpoint settings
+        _._opt = _.opt
+
+        if (_.opt.skipTrack) {
+            // first and only child is the track
+            _.track = _.ele.children[0]
+        } else {
+            // create track and wrap slides
+            _.track = document.createElement('div')
+            _.ele.appendChild(_.track)
+            while (_.ele.children.length !== 1) {
+                _.track.appendChild(_.ele.children[0])
+            }
         }
 
-        throw new Error("Error controlado");
-    }
-} else {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/UDCxzQ.jpg';
+        _.track.classList.add('glider-track')
 
-    const parent = document.querySelector('.ui-search-results');
+        // start glider
+        _.init()
 
-    if (URLactual == '/listado/electronica-audio-video/_DisplayType_G' || URLactual == '/listado/electronica-audio-video/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
+        // set events
+        _.resize = _.init.bind(_, true)
+        _.event(_.ele, 'add', {
+            scroll: _.updateControls.bind(_)
+        })
+        _.event(_window, 'add', {
+            resize: _.resize
+        })
+    })
+
+    var gliderPrototype = Glider.prototype
+    gliderPrototype.init = function (refresh, paging) {
+        var _ = this
+
+        var width = 0
+
+        var height = 0
+
+        _.slides = _.track.children;
+
+        [].forEach.call(_.slides, function (_, i) {
+            _.classList.add('glider-slide')
+            _.setAttribute('data-gslide', i)
+        })
+
+        _.containerWidth = _.ele.clientWidth
+
+        var breakpointChanged = _.settingsBreakpoint()
+        if (!paging) paging = breakpointChanged
+
+        if (
+            _.opt.slidesToShow === 'auto' ||
+            typeof _.opt._autoSlide !== 'undefined'
+        ) {
+            var slideCount = _.containerWidth / _.opt.itemWidth
+
+            _.opt._autoSlide = _.opt.slidesToShow = _.opt.exactWidth ?
+                slideCount :
+                Math.max(1, Math.floor(slideCount))
+        }
+        if (_.opt.slidesToScroll === 'auto') {
+            _.opt.slidesToScroll = Math.floor(_.opt.slidesToShow)
         }
 
-        throw new Error("Error controlado");
-    }
-}
+        _.itemWidth = _.opt.exactWidth ?
+            _.opt.itemWidth :
+            _.containerWidth / _.opt.slidesToShow;
 
-/*TELEVISORES*/
-if (document.querySelector('.ui-search-toolbar')) {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBfgrF.jpg';
-    banner.style = 'margin: 0 auto; max-width: 380px; display: flex;';
+        // set slide dimensions
+        [].forEach.call(_.slides, function (__) {
+            __.style.height = 'auto'
+            __.style.width = _.itemWidth + 'px'
+            width += _.itemWidth
+            height = Math.max(__.offsetHeight, height)
+        })
 
-    const parent = document.querySelector('.ui-search-toolbar');
+        _.track.style.width = width + 'px'
+        _.trackWidth = width
+        _.isDrag = false
+        _.preventClick = false
+        _.move = false
 
-    if (URLactual == '/listado/electronica-audio-video/televisores/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
+        _.opt.resizeLock && _.scrollTo(_.slide * _.itemWidth, 0)
+
+        if (breakpointChanged || paging) {
+            _.bindArrows()
+            _.buildDots()
+            _.bindDrag()
         }
 
-        throw new Error("Error controlado");
+        _.updateControls()
+
+        _.emit(refresh ? 'refresh' : 'loaded')
     }
-} else {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBfgrF.jpg';
 
-    const parent = document.querySelector('.ui-search-results');
+    gliderPrototype.bindDrag = function () {
+        var _ = this
+        _.mouse = _.mouse || _.handleMouse.bind(_)
 
-    if (URLactual == '/listado/electronica-audio-video/televisores/_DisplayType_G' || URLactual == '/listado/electronica-audio-video/televisores/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
+        var mouseup = function () {
+            _.mouseDown = undefined
+            _.ele.classList.remove('drag')
+            if (_.isDrag) {
+                _.preventClick = true
+            }
+            _.isDrag = false
         }
 
-        throw new Error("Error controlado");
-    }
-}
-
-/*AUDIO*/
-if (document.querySelector('.ui-search-toolbar')) {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBf67a.jpg';
-    banner.style = 'margin: 0 auto; max-width: 380px; display: flex;';
-
-    const parent = document.querySelector('.ui-search-toolbar');
-
-    if (URLactual == '/listado/electronica-audio-video/audio/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
+        const move = function () {
+            _.move = true
         }
 
-        throw new Error("Error controlado");
-    }
-} else {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBf67a.jpg';
-
-    const parent = document.querySelector('.ui-search-results');
-
-    if (URLactual == '/listado/electronica-audio-video/audio/_DisplayType_G' || URLactual == '/listado/electronica-audio-video/audio/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
+        var events = {
+            mouseup: mouseup,
+            mouseleave: mouseup,
+            mousedown: function (e) {
+                e.preventDefault()
+                e.stopPropagation()
+                _.mouseDown = e.clientX
+                _.ele.classList.add('drag')
+                _.move = false
+                setTimeout(move, 300)
+            },
+            touchstart: function (e) {
+                _.ele.classList.add('drag')
+                _.move = false
+                setTimeout(move, 300)
+            },
+            mousemove: _.mouse,
+            click: function (e) {
+                if (_.preventClick && _.move) {
+                    e.preventDefault()
+                    e.stopPropagation()
+                }
+                _.preventClick = false
+                _.move = false
+            }
         }
 
-        throw new Error("Error controlado");
+        _.ele.classList.toggle('draggable', _.opt.draggable === true)
+        _.event(_.ele, 'remove', events)
+        if (_.opt.draggable) _.event(_.ele, 'add', events)
     }
-}
 
-/*ELECTRODOMESTICOS Y AIRES ACONDICIONADOS*/
-if (document.querySelector('.ui-search-toolbar')) {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gN5nrG.jpg';
-    banner.style = 'margin: 0 auto; max-width: 380px; display: flex;';
+    gliderPrototype.buildDots = function () {
+        var _ = this
 
-    const parent = document.querySelector('.ui-search-toolbar');
-
-    if (URLactual == '/listado/electrodomesticos-aires-ac/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
+        if (!_.opt.dots) {
+            if (_.dots) _.dots.innerHTML = ''
+            return
         }
 
-        throw new Error("Error controlado");
+        if (typeof _.opt.dots === 'string') {
+            _.dots = document.querySelector(_.opt.dots)
+        } else _.dots = _.opt.dots
+        if (!_.dots) return
+
+        _.dots.innerHTML = ''
+        _.dots.setAttribute('role', 'tablist')
+        _.dots.classList.add('glider-dots')
+
+        for (var i = 0; i < Math.ceil(_.slides.length / _.opt.slidesToShow); ++i) {
+            var dot = document.createElement('button')
+            dot.dataset.index = i
+            dot.setAttribute('aria-label', 'Page ' + (i + 1))
+            dot.setAttribute('role', 'tab')
+            dot.className = 'glider-dot ' + (i ? '' : 'active')
+            _.event(dot, 'add', {
+                click: _.scrollItem.bind(_, i, true)
+            })
+            _.dots.appendChild(dot)
+        }
     }
-} else {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gN5nrG.jpg';
 
-    const parent = document.querySelector('.ui-search-results');
+    gliderPrototype.bindArrows = function () {
+        var _ = this
+        if (!_.opt.arrows) {
+            Object.keys(_.arrows).forEach(function (direction) {
+                var element = _.arrows[direction]
+                _.event(element, 'remove', {
+                    click: element._func
+                })
+            })
+            return
+        }
+        ['prev', 'next'].forEach(function (direction) {
+            var arrow = _.opt.arrows[direction]
+            if (arrow) {
+                if (typeof arrow === 'string') arrow = document.querySelector(arrow)
+                if (arrow) {
+                    arrow._func = arrow._func || _.scrollItem.bind(_, direction)
+                    _.event(arrow, 'remove', {
+                        click: arrow._func
+                    })
+                    _.event(arrow, 'add', {
+                        click: arrow._func
+                    })
+                    _.arrows[direction] = arrow
+                }
+            }
+        })
+    }
 
-    if (URLactual == '/listado/electrodomesticos-aires-ac/_DisplayType_G' || URLactual == '/listado/electrodomesticos-aires-ac/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
+    gliderPrototype.updateControls = function (event) {
+        var _ = this
+
+        if (event && !_.opt.scrollPropagate) {
+            event.stopPropagation()
         }
 
-        throw new Error("Error controlado");
-    }
-}
+        var disableArrows = _.containerWidth >= _.trackWidth
 
-/*LAVADO*/
-if (document.querySelector('.ui-search-toolbar')) {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBBlPS.jpg';
-    banner.style = 'margin: 0 auto; max-width: 380px; display: flex;';
+        if (!_.opt.rewind) {
+            if (_.arrows.prev) {
+                _.arrows.prev.classList.toggle(
+                    'disabled',
+                    _.ele.scrollLeft <= 0 || disableArrows
+                )
 
-    const parent = document.querySelector('.ui-search-toolbar');
+                _.arrows.prev.setAttribute(
+                    'aria-disabled',
+                    _.arrows.prev.classList.contains('disabled')
+                )
+            }
+            if (_.arrows.next) {
+                _.arrows.next.classList.toggle(
+                    'disabled',
+                    Math.ceil(_.ele.scrollLeft + _.containerWidth) >=
+                    Math.floor(_.trackWidth) || disableArrows
+                )
 
-    if (URLactual == '/listado/electrodomesticos-aires-ac/lavado/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
+                _.arrows.next.setAttribute(
+                    'aria-disabled',
+                    _.arrows.next.classList.contains('disabled')
+                )
+            }
         }
 
-        throw new Error("Error controlado");
-    }
-} else {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBBlPS.jpg';
+        _.slide = Math.round(_.ele.scrollLeft / _.itemWidth)
+        _.page = Math.round(_.ele.scrollLeft / _.containerWidth)
 
-    const parent = document.querySelector('.ui-search-results');
+        var middle = _.slide + Math.floor(Math.floor(_.opt.slidesToShow) / 2)
 
-    if (URLactual == '/listado/electrodomesticos-aires-ac/lavado/_DisplayType_G' || URLactual == '/listado/electrodomesticos-aires-ac/lavado/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
+        var extraMiddle = Math.floor(_.opt.slidesToShow) % 2 ? 0 : middle + 1
+        if (Math.floor(_.opt.slidesToShow) === 1) {
+            extraMiddle = 0
         }
 
-        throw new Error("Error controlado");
-    }
-}
-
-/*REFRIGERACION*/
-if (document.querySelector('.ui-search-toolbar')) {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/Hda4KhX.jpg';
-    banner.style = 'margin: 0 auto; max-width: 380px; display: flex;';
-
-    const parent = document.querySelector('.ui-search-toolbar');
-
-    if (URLactual == '/listado/electrodomesticos-aires-ac/refrigeracion/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
+        // the last page may be less than one half of a normal page width so
+        // the page is rounded down. when at the end, force the page to turn
+        if (_.ele.scrollLeft + _.containerWidth >= Math.floor(_.trackWidth)) {
+            _.page = _.dots ? _.dots.children.length - 1 : 0
         }
 
-        throw new Error("Error controlado");
-    }
-} else {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/Hda4KhX.jpg';
-    const parent = document.querySelector('.ui-search-results');
+        [].forEach.call(_.slides, function (slide, index) {
+            var slideClasses = slide.classList
 
-    if (URLactual == '/listado/electrodomesticos-aires-ac/refrigeracion/_DisplayType_G' || URLactual == '/listado/electrodomesticos-aires-ac/refrigeracion/heladeras/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
+            var wasVisible = slideClasses.contains('visible')
+
+            var start = _.ele.scrollLeft
+
+            var end = _.ele.scrollLeft + _.containerWidth
+
+            var itemStart = _.itemWidth * index
+
+            var itemEnd = itemStart + _.itemWidth;
+
+            [].forEach.call(slideClasses, function (className) {
+                /^left|right/.test(className) && slideClasses.remove(className)
+            })
+            slideClasses.toggle('active', _.slide === index)
+            if (middle === index || (extraMiddle && extraMiddle === index)) {
+                slideClasses.add('center')
+            } else {
+                slideClasses.remove('center')
+                slideClasses.add(
+                    [
+                        index < middle ? 'left' : 'right',
+                        Math.abs(index - (index < middle ? middle : extraMiddle || middle))
+                    ].join('-')
+                )
+            }
+
+            var isVisible =
+                Math.ceil(itemStart) >= Math.floor(start) &&
+                Math.floor(itemEnd) <= Math.ceil(end)
+            slideClasses.toggle('visible', isVisible)
+            if (isVisible !== wasVisible) {
+                _.emit('slide-' + (isVisible ? 'visible' : 'hidden'), {
+                    slide: index
+                })
+            }
+        })
+        if (_.dots) {
+            [].forEach.call(_.dots.children, function (dot, index) {
+                dot.classList.toggle('active', _.page === index)
+            })
         }
 
-        throw new Error("Error controlado");
+        if (event && _.opt.scrollLock) {
+            clearTimeout(_.scrollLock)
+            _.scrollLock = setTimeout(function () {
+                clearTimeout(_.scrollLock)
+                // dont attempt to scroll less than a pixel fraction - causes looping
+                if (Math.abs(_.ele.scrollLeft / _.itemWidth - _.slide) > 0.02) {
+                    if (!_.mouseDown) {
+                        // Only scroll if not at the end (#94)
+                        if (_.trackWidth > _.containerWidth + _.ele.scrollLeft) {
+                            _.scrollItem(_.getCurrentSlide())
+                        }
+                    }
+                }
+            }, _.opt.scrollLockDelay || 250)
+        }
     }
-}
 
-/*CLIMATIZACION*/
-if (document.querySelector('.ui-search-toolbar')) {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBBUHg.jpg';
-    banner.style = 'margin: 0 auto; max-width: 380px; display: flex;';
+    gliderPrototype.getCurrentSlide = function () {
+        var _ = this
+        return _.round(_.ele.scrollLeft / _.itemWidth)
+    }
 
-    const parent = document.querySelector('.ui-search-toolbar');
+    gliderPrototype.scrollItem = function (slide, dot, e) {
+        if (e) e.preventDefault()
 
-    if (URLactual == '/listado/electrodomesticos-aires-ac/climatizacion/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
+        var _ = this
+
+        var originalSlide = slide
+            ++_.animate_id
+
+        var prevSlide = _.slide
+        var position
+
+        if (dot === true) {
+            slide = Math.round((slide * _.containerWidth) / _.itemWidth)
+            position = slide * _.itemWidth
+        } else {
+            if (typeof slide === 'string') {
+                var backwards = slide === 'prev'
+
+                // use precise location if fractional slides are on
+                if (_.opt.slidesToScroll % 1 || _.opt.slidesToShow % 1) {
+                    slide = _.getCurrentSlide()
+                } else {
+                    slide = _.slide
+                }
+
+                if (backwards) slide -= _.opt.slidesToScroll
+                else slide += _.opt.slidesToScroll
+
+                if (_.opt.rewind) {
+                    var scrollLeft = _.ele.scrollLeft
+                    slide =
+                        backwards && !scrollLeft ?
+                        _.slides.length :
+                        !backwards &&
+                        scrollLeft + _.containerWidth >= Math.floor(_.trackWidth) ?
+                        0 :
+                        slide
+                }
+            }
+
+            slide = Math.max(Math.min(slide, _.slides.length), 0)
+
+            _.slide = slide
+            position = _.itemWidth * slide
         }
 
-        throw new Error("Error controlado");
+        _.emit('scroll-item', {
+            prevSlide,
+            slide
+        })
+
+        _.scrollTo(
+            position,
+            _.opt.duration * Math.abs(_.ele.scrollLeft - position),
+            function () {
+                _.updateControls()
+                _.emit('animated', {
+                    value: originalSlide,
+                    type: typeof originalSlide === 'string' ? 'arrow' : dot ? 'dot' : 'slide'
+                })
+            }
+        )
+
+        return false
     }
-} else {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBBUHg.jpg';
 
-    const parent = document.querySelector('.ui-search-results');
+    gliderPrototype.settingsBreakpoint = function () {
+        var _ = this
 
-    if (URLactual == '/listado/electrodomesticos-aires-ac/climatizacion/_DisplayType_G' || URLactual == '/listado/electrodomesticos-aires-ac/climatizacion/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
+        var resp = _._opt.responsive
+
+        if (resp) {
+            // Sort the breakpoints in mobile first order
+            resp.sort(function (a, b) {
+                return b.breakpoint - a.breakpoint
+            })
+
+            for (var i = 0; i < resp.length; ++i) {
+                var size = resp[i]
+                if (_window.innerWidth >= size.breakpoint) {
+                    if (_.breakpoint !== size.breakpoint) {
+                        _.opt = Object.assign({}, _._opt, size.settings)
+                        _.breakpoint = size.breakpoint
+                        return true
+                    }
+                    return false
+                }
+            }
+        }
+        // set back to defaults in case they were overriden
+        var breakpointChanged = _.breakpoint !== 0
+        _.opt = Object.assign({}, _._opt)
+        _.breakpoint = 0
+        return breakpointChanged
+    }
+
+    gliderPrototype.scrollTo = function (scrollTarget, scrollDuration, callback) {
+        var _ = this
+
+        var start = new Date().getTime()
+
+        var animateIndex = _.animate_id
+
+        var animate = function () {
+            var now = new Date().getTime() - start
+            _.ele.scrollLeft =
+                _.ele.scrollLeft +
+                (scrollTarget - _.ele.scrollLeft) *
+                _.opt.easing(0, now, 0, 1, scrollDuration)
+            if (now < scrollDuration && animateIndex === _.animate_id) {
+                _window.requestAnimationFrame(animate)
+            } else {
+                _.ele.scrollLeft = scrollTarget
+                callback && callback.call(_)
+            }
         }
 
-        throw new Error("Error controlado");
+        _window.requestAnimationFrame(animate)
     }
-}
 
-/*COCINAS Y HORNOS*/
-if (document.querySelector('.ui-search-toolbar')) {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBBrOJ.jpg';
-    banner.style = 'margin: 0 auto; max-width: 380px; display: flex;';
+    gliderPrototype.removeItem = function (index) {
+        var _ = this
 
-    const parent = document.querySelector('.ui-search-toolbar');
+        if (_.slides.length) {
+            _.track.removeChild(_.slides[index])
+            _.refresh(true)
+            _.emit('remove')
+        }
+    }
 
-    if (URLactual == '/listado/electrodomesticos-aires-ac/coccion/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
+    gliderPrototype.addItem = function (ele) {
+        var _ = this
+
+        _.track.appendChild(ele)
+        _.refresh(true)
+        _.emit('add')
+    }
+
+    gliderPrototype.handleMouse = function (e) {
+        var _ = this
+        if (_.mouseDown) {
+            _.isDrag = true
+            _.ele.scrollLeft +=
+                (_.mouseDown - e.clientX) * (_.opt.dragVelocity || 3.3)
+            _.mouseDown = e.clientX
+        }
+    }
+
+    // used to round to the nearest 0.XX fraction
+    gliderPrototype.round = function (double) {
+        var _ = this
+        var step = _.opt.slidesToScroll % 1 || 1
+        var inv = 1.0 / step
+        return Math.round(double * inv) / inv
+    }
+
+    gliderPrototype.refresh = function (paging) {
+        var _ = this
+        _.init(true, paging)
+    }
+
+    gliderPrototype.setOption = function (opt, global) {
+        var _ = this
+
+        if (_.breakpoint && !global) {
+            _._opt.responsive.forEach(function (v) {
+                if (v.breakpoint === _.breakpoint) {
+                    v.settings = Object.assign({}, v.settings, opt)
+                }
+            })
+        } else {
+            _._opt = Object.assign({}, _._opt, opt)
         }
 
-        throw new Error("Error controlado");
+        _.breakpoint = 0
+        _.settingsBreakpoint()
     }
-} else {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBBrOJ.jpg';
 
-    const parent = document.querySelector('.ui-search-results');
+    gliderPrototype.destroy = function () {
+        var _ = this
 
-    if (URLactual == '/listado/electrodomesticos-aires-ac/coccion/_DisplayType_G' || URLactual == '/listado/electrodomesticos-aires-ac/coccion/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
+        var replace = _.ele.cloneNode(true)
+
+        var clear = function (ele) {
+            ele.removeAttribute('style');
+            [].forEach.call(ele.classList, function (className) {
+                /^glider/.test(className) && ele.classList.remove(className)
+            })
         }
-
-        throw new Error("Error controlado");
+        // remove track
+        replace.children[0].outerHTML = replace.children[0].innerHTML
+        clear(replace);
+        [].forEach.call(replace.getElementsByTagName('*'), clear)
+        _.ele.parentNode.replaceChild(replace, _.ele)
+        _.event(_window, 'remove', {
+            resize: _.resize
+        })
+        _.emit('destroy')
     }
-}
 
-/*PEQUEÑOS ELECTRODOMESTICOS*/
-if (document.querySelector('.ui-search-toolbar')) {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBBPxR.jpg';
-    banner.style = 'margin: 0 auto; max-width: 380px; display: flex;';
+    gliderPrototype.emit = function (name, arg) {
+        var _ = this
 
-    const parent = document.querySelector('.ui-search-toolbar');
-
-    if (URLactual == '/listado/electrodomesticos-aires-ac/pequenos-electrodomesticos/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
+        var e = new _window.CustomEvent('glider-' + name, {
+            bubbles: !_.opt.eventPropagate,
+            detail: arg
+        })
+        _.ele.dispatchEvent(e)
     }
-} else {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBBPxR.jpg';
 
-    const parent = document.querySelector('.ui-search-results');
-
-    if (URLactual == '/listado/electrodomesticos-aires-ac/pequenos-electrodomesticos/_DisplayType_G' || URLactual == '/listado/electrodomesticos-aires-ac/pequenos-electrodomesticos/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
+    gliderPrototype.event = function (ele, type, args) {
+        var eventHandler = ele[type + 'EventListener'].bind(ele)
+        Object.keys(args).forEach(function (k) {
+            eventHandler(k, args[k])
+        })
     }
-}
 
-/*CELULARES*/
-if (document.querySelector('.ui-search-toolbar')) {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/USOTbe.jpg';
-    banner.style = 'margin: 0 auto; max-width: 380px; display: flex;';
+    return Glider
+})
 
-    const parent = document.querySelector('.ui-search-toolbar');
-
-    if (URLactual == '/listado/celulares-telefonos/celulares-smartphones/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
+new Glider(document.querySelector('.glider'), {
+    slidesToShow: 4,
+    slidesToScroll: 1,
+    draggable: true,
+    dots: '.dots',
+    arrows: {
+      prev: '.glider-prev',
+      next: '.glider-next'
     }
-} else {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/USOTbe.jpg';
-
-    const parent = document.querySelector('.ui-search-results');
-
-    if (URLactual == '/listado/celulares-telefonos/celulares-smartphones/_DisplayType_G' || URLactual == '/listado/celulares-telefonos/celulares-smartphones/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
-    }
-}
-
-/*COMPUTACION*/
-if (document.querySelector('.ui-search-toolbar')) {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/UDCY7a.md.jpg';
-    banner.style = 'margin: 0 auto; max-width: 380px; display: flex;';
-
-    const parent = document.querySelector('.ui-search-toolbar');
-
-    if (URLactual == '/listado/computacion/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
-    }
-} else {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/UDCY7a.md.jpg';
-
-    const parent = document.querySelector('.ui-search-results');
-
-    if (URLactual == '/listado/computacion/_DisplayType_G' || URLactual == '/listado/computacion/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
-    }
-}
-
-/*PC ESCRITORIO*/
-if (document.querySelector('.ui-search-toolbar')) {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBBsiN.jpg';
-    banner.style = 'margin: 0 auto; max-width: 380px; display: flex;';
-
-    const parent = document.querySelector('.ui-search-toolbar');
-
-    if (URLactual == '/listado/computacion/pc-escritorio/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
-    }
-} else {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBBsiN.jpg';
-
-    const parent = document.querySelector('.ui-search-results');
-
-    if (URLactual == '/listado/computacion/pc-escritorio/_DisplayType_G' || URLactual == '/listado/computacion/pc-escritorio/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
-    }
-}
-
-/*TABLET*/
-if (document.querySelector('.ui-search-toolbar')) {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBBbJn.jpg';
-    banner.style = 'margin: 0 auto; max-width: 380px; display: flex;';
-
-    const parent = document.querySelector('.ui-search-toolbar');
-
-    if (URLactual == '/listado/computacion/tablets-accesorios/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
-    }
-} else {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBBbJn.jpg';
-
-    const parent = document.querySelector('.ui-search-results');
-
-    if (URLactual == '/listado/computacion/tablets-accesorios/_DisplayType_G' || URLactual == '/listado/computacion/tablets-accesorios/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
-    }
-}
-
-/*NOTEBOOK*/
-if (document.querySelector('.ui-search-toolbar')) {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBCHx4.jpg';
-    banner.style = 'margin: 0 auto; max-width: 380px; display: flex;';
-
-    const parent = document.querySelector('.ui-search-toolbar');
-
-    if (URLactual == '/listado/computacion/laptops-accesorios/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
-    }
-} else {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBCHx4.jpg';
-
-    const parent = document.querySelector('.ui-search-results');
-
-    if (URLactual == '/listado/computacion/laptops-accesorios/_DisplayType_G' || URLactual == '/listado/computacion/laptops-accesorios/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
-    }
-}
-
-/*MONITORES*/
-if (document.querySelector('.ui-search-toolbar')) {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBC3fS.jpg';
-    banner.style = 'margin: 0 auto; max-width: 380px; display: flex;';
-
-    const parent = document.querySelector('.ui-search-toolbar');
-
-    if (URLactual == '/listado/computacion/monitores-accesorios/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
-    }
-} else {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBC3fS.jpg';
-
-    const parent = document.querySelector('.ui-search-results');
-
-    if (URLactual == '/listado/computacion/monitores-accesorios/_DisplayType_G' || URLactual == '/listado/computacion/monitores-accesorios/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
-    }
-}
-
-/*COMPONENTES*/
-if (document.querySelector('.ui-search-toolbar')) {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBCj7n.jpg';
-    banner.style = 'margin: 0 auto; max-width: 380px; display: flex;';
-
-    const parent = document.querySelector('.ui-search-toolbar');
-
-    if (URLactual == '/componentes' || URLactual == '/listado/computacion/componentes-pc/memoriasram' || URLactual == '/listado/computacion/componentes-pc/placas' || URLactual == '/listado/computacion/componentes-pc/discos-accesorios/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
-    }
-} else {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBCj7n.jpg';
-
-    const parent = document.querySelector('.ui-search-results');
-
-    if (URLactual == '/componentes_DisplayType_G' || URLactual == '/componentes' || URLactual == '/listado/computacion/componentes-pc/memoriasram_DisplayType_G' || URLactual == '/listado/computacion/componentes-pc/placas/_DisplayType_G' || URLactual == '/listado/computacion/componentes-pc/discos-accesorios/_DisplayType_G') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
-    }
-}
-
-/*PERIFERICOS*/
-if (document.querySelector('.ui-search-toolbar')) {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBCwes.jpg';
-    banner.style = 'margin: 0 auto; max-width: 380px; display: flex;';
-
-    const parent = document.querySelector('.ui-search-toolbar');
-
-    if (URLactual == '/listado/computacion/perifericos-pc/' || URLactual == '/listado/computacion/perifericos-pc/mouses-teclados/mouses/' || URLactual == '/listado/computacion/perifericos-pc/teclado' || URLactual == '/listado/computacion/perifericos-pc/webcams') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
-    }
-} else {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBCwes.jpg';
-
-    const parent = document.querySelector('.ui-search-results');
-
-    if (URLactual == '/listado/computacion/perifericos-pc/_DisplayType_G' || URLactual == '/listado/computacion/perifericos-pc/' || URLactual == '/listado/computacion/perifericos-pc/mouses-teclados/mouses/_DisplayType_G' || URLactual == '/listado/computacion/perifericos-pc/teclado_DisplayType_G' || URLactual == '/listado/computacion/perifericos-pc/webcams_DisplayType_G') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
-    }
-}
-
-/*IMPRESORAS*/
-if (document.querySelector('.ui-search-toolbar')) {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBCPku.jpg';
-    banner.style = 'margin: 0 auto; max-width: 380px; display: flex;';
-
-    const parent = document.querySelector('.ui-search-toolbar');
-
-    if (URLactual == '/listado/computacion/impresion/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
-    }
-} else {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBCPku.jpg';
-
-    const parent = document.querySelector('.ui-search-results');
-
-    if (URLactual == '/listado/computacion/impresion/_DisplayType_G' || URLactual == '/listado/computacion/impresion/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
-    }
-}
-
-/*HERRAMIENTAS*/
-if (document.querySelector('.ui-search-toolbar')) {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/UDCakJ.jpg';
-    banner.style = 'margin: 0 auto; max-width: 380px; display: flex;';
-
-    const parent = document.querySelector('.ui-search-toolbar');
-
-    if (URLactual == '/listado/herramientas/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
-    }
-} else {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/UDCakJ.jpg';
-
-    const parent = document.querySelector('.ui-search-results');
-
-    if (URLactual == '/listado/herramientas/_DisplayType_G' || URLactual == '/listado/herramientas/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
-    }
-}
-
-/*ELECTRICAS*/
-if (document.querySelector('.ui-search-toolbar')) {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBCQhx.jpg';
-    banner.style = 'margin: 0 auto; max-width: 380px; display: flex;';
-
-    const parent = document.querySelector('.ui-search-toolbar');
-
-    if (URLactual == '/listado/herramientas/herramientas-electricas/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
-    }
-} else {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBCQhx.jpg';
-
-    const parent = document.querySelector('.ui-search-results');
-
-    if (URLactual == '/listado/herramientas/herramientas-electricas/_DisplayType_G' || URLactual == '/listado/herramientas/herramientas-electricas/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
-    }
-}
-
-/*JARDIN*/
-if (document.querySelector('.ui-search-toolbar')) {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBCZLQ.jpg';
-    banner.style = 'margin: 0 auto; max-width: 380px; display: flex;';
-
-    const parent = document.querySelector('.ui-search-toolbar');
-
-    if (URLactual == '/listado/herramientas/herramientas-jardin/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
-    }
-} else {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/gBCZLQ.jpg';
-
-    const parent = document.querySelector('.ui-search-results');
-
-    if (URLactual == '/listado/herramientas/herramientas-jardin/_DisplayType_G' || URLactual == '/listado/herramientas/herramientas-jardin/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
-    }
-}
-
-/*MAS CATEGORIAS*/
-if (document.querySelector('.ui-search-toolbar')) {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/UDC0IR.jpg';
-    banner.style = 'margin: 0 auto; max-width: 380px; display: flex;';
-
-    const parent = document.querySelector('.ui-search-toolbar');
-
-    if (URLactual == '/listado/deportes-fitness/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
-    }
-} else {
-    const banner = document.createElement('img');
-    banner.src = 'https://iili.io/UDC0IR.jpg';
-
-    const parent = document.querySelector('.ui-search-results');
-
-    if (URLactual == '/listado/deportes-fitness/_DisplayType_G' || URLactual == '/listado/deportes-fitness/') {
-        if (parent !== null) {
-            parent.insertBefore(banner, parent.firstChild);
-        }
-
-        throw new Error("Error controlado");
-    }
-}
+  });
